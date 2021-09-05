@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateShopDto } from './dto/create-shop.dto';
@@ -39,7 +39,8 @@ export class ShopService {
     return this.shops
       .findOne(idShop, { select: ['owner'] })
       .then((shop: Shops) => {
-        if (shop.owner !== idOwner) throw 'not owner';
+        if (shop.owner !== idOwner)
+          throw new HttpException('not owner', HttpStatus.NOT_FOUND);
       });
   }
 }

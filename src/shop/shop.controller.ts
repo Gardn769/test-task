@@ -3,8 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  HttpException,
-  HttpStatus,
   Param,
   Post,
   Req,
@@ -62,19 +60,9 @@ export class ShopController {
   @UseGuards(JwtAuthGuard)
   @Delete('/:iddelShop')
   async deleteShop(@Param('iddelShop') iddelShop: number, @Req() req) {
-    await this.shopService
-      .checkOwner(iddelShop, req.user.userId)
-      .then(() => {
-        this.shopService.deleteshop(iddelShop);
-      })
-      .catch(e => {
-        throw new HttpException(
-          {
-            message: 'not owner',
-          },
-          HttpStatus.BAD_REQUEST
-        );
-      });
+    await this.shopService.checkOwner(iddelShop, req.user.userId);
+    this.shopService.deleteshop(iddelShop);
+
     return `delete shop id=${iddelShop}`;
   }
 }

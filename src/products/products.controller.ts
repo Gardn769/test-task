@@ -82,7 +82,6 @@ export class ProductsController {
   @UseGuards(JwtAuthGuard)
   @Get('/allBuyRequestUser')
   BuyRequestUser(@Req() req): Promise<Transactions[]> {
-    //TODO:
     return this.productsService.getAllBuyRequestUser(req.user.userId);
   }
 

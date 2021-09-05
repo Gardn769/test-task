@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductDto } from 'src/products/dto/create-product.dto';
 import { UpdateProductDto } from 'src/products/dto/update-product.dto';
@@ -79,7 +79,8 @@ export class ProductsOwnerService {
     return this.products
       .findOne(idProduct, { select: ['owner'] })
       .then((shop: Products) => {
-        if (shop.owner !== idowner) throw 'not owner';
+        if (shop.owner !== idowner)
+          throw new HttpException('not owner', HttpStatus.NOT_FOUND);
       });
   }
 
@@ -87,7 +88,8 @@ export class ProductsOwnerService {
     return this.shop
       .findOne({ where: { name: shop_name }, select: ['name'] })
       .then((shop: Shops) => {
-        if (shop.name !== shop_name) throw 'Shop not created';
+        if (shop.name !== shop_name)
+          throw new HttpException('Shop not created', HttpStatus.NOT_FOUND);
       });
   }
 
@@ -95,7 +97,8 @@ export class ProductsOwnerService {
     return this.transaction
       .findOne(idTrans, { select: ['owner'] })
       .then((trans: Transactions) => {
-        if (trans.owner !== idowner) throw 'not owner';
+        if (trans.owner !== idowner)
+          throw new HttpException('not owner', HttpStatus.NOT_FOUND);
       });
   }
 }

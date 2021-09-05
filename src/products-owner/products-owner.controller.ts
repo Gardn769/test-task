@@ -32,27 +32,15 @@ export class ProductsOwnerController {
   constructor(private productsOwnerService: ProductsOwnerService) {}
 
   @ApiCookieAuth()
-  @ApiOperation({ summary: 'Create Product' })
+  @ApiOperation({ summary: 'Create Product', description: 'lol' })
   @ApiResponse({ status: 201, type: CreateProductDto })
   @UseGuards(JwtAuthGuard)
   @Post() //TODO:
   async create(@Req() req, @Body() productDto: CreateProductDto) {
-    await this.productsOwnerService
-      .checkShop(productDto.shop_name)
-      // await this.productsService.checkOwner( req.user.userId)
-      .then(() => {
-        this.productsOwnerService.createproduct(req.user.userId, productDto);
-      })
-      .catch(e => {
-        throw new HttpException(
-          {
-            message: 'not owner',
-          },
-          HttpStatus.BAD_REQUEST
-        );
-      });
+    await this.productsOwnerService.checkShop(productDto.shop_name);
+    // await this.productsOwnerService.checkOwner(productDto.shop_name, req.user.userId);//TODO:
+    this.productsOwnerService.createproduct(req.user.userId, productDto);
 
-    // await this.productsService.createproduct(req.user.userId, productDto);
     return;
   }
 
@@ -66,19 +54,10 @@ export class ProductsOwnerController {
     @Req() req,
     @Body() updateProduct: UpdateProductDto
   ): Promise<any> {
-    await this.productsOwnerService
-      .checkOwner(id, req.user.userId)
-      .then(() => {
-        this.productsOwnerService.updateProducts(id, updateProduct);
-      })
-      .catch(e => {
-        throw new HttpException(
-          {
-            message: 'not owner',
-          },
-          HttpStatus.BAD_REQUEST
-        );
-      });
+    await this.productsOwnerService.checkOwner(id, req.user.userId);
+    this.productsOwnerService.updateProducts(id, updateProduct);
+
+    // return
   }
 
   @ApiCookieAuth()
@@ -94,19 +73,8 @@ export class ProductsOwnerController {
     @Param('delProductid') delProductid: number,
     @Req() req
   ): Promise<void> {
-    await this.productsOwnerService
-      .checkOwner(delProductid, req.user.userId)
-      .then(() => {
-        this.productsOwnerService.deleteProduct(delProductid);
-      })
-      .catch(e => {
-        throw new HttpException(
-          {
-            message: 'not owner',
-          },
-          HttpStatus.BAD_REQUEST
-        );
-      });
+    await this.productsOwnerService.checkOwner(delProductid, req.user.userId);
+    this.productsOwnerService.deleteProduct(delProductid);
 
     // return
   }
@@ -130,21 +98,7 @@ export class ProductsOwnerController {
     @Req() req,
     @Body() updateTransactionsDto: UpdateTransactionsDto
   ): Promise<any> {
-    await this.productsOwnerService
-      .checkOwnertrans(id, req.user.userId)
-      .then(() => {
-        this.productsOwnerService.updateBuyRequestUser(
-          id,
-          updateTransactionsDto
-        );
-      })
-      .catch(e => {
-        throw new HttpException(
-          {
-            message: 'not owner',
-          },
-          HttpStatus.BAD_REQUEST
-        );
-      });
+    await this.productsOwnerService.checkOwnertrans(id, req.user.userId);
+    this.productsOwnerService.updateBuyRequestUser(id, updateTransactionsDto);
   }
 }
