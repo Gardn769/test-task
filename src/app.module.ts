@@ -11,23 +11,34 @@ import { ProductsController } from './products/products.controller';
 import { AuthModule } from './auth/auth.module';
 import { ShopModule } from './shop/shop.module';
 import configuration from './configs/configuration';
+import { AuthController } from './auth/auth.controller';
+import { ProductsOwnerController } from './products-owner/products-owner.controller';
+import { ProductsOwnerModule } from './products-owner/products-owner.module';
 
 @Module({
-  controllers: [AppController, UsersController, ShopController, ProductsController],
+  controllers: [
+    AppController,
+    AuthController,
+    UsersController,
+    ShopController,
+    ProductsController,
+    ProductsOwnerController,
+  ],
   providers: [AppService],
   imports: [
-    ProductsModule, 
+    AuthModule,
+    ProductsModule,
     UsersModule,
-    AuthModule,   
     ConfigModule.forRoot({
-    load: [configuration]
+      load: [configuration],
     }),
-  TypeOrmModule.forRootAsync({
-    imports: [ConfigModule],
-    useFactory: (config: ConfigService) => config.get('database'),
-    inject: [ConfigService],
-  }),
-  ShopModule,
-],
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (config: ConfigService) => config.get('database'),
+      inject: [ConfigService],
+    }),
+    ShopModule,
+    ProductsOwnerModule,
+  ],
 })
 export class AppModule {}

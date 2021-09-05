@@ -11,10 +11,9 @@ import { Shops } from 'src/shop/shop.entity';
 import { Transactions } from './transactions.entity';
 
 @Module({
-    imports: [  TypeOrmModule.forFeature([Products,Shops,Transactions]),],
-    controllers: [ProductsController],
-    exports: [ProductsService],
-    providers: [
-        ProductsService, ],
+  imports: [TypeOrmModule.forFeature([Products, Shops, Transactions])],
+  controllers: [ProductsController],
+  exports: [ProductsService],
+  providers: [ProductsService],
 })
 export class ProductsModule {}
