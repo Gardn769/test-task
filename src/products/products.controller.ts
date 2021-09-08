@@ -21,22 +21,23 @@ import { Transactions } from './transactions.entity';
 
 @ApiTags('products')
 @ApiCookieAuth()
+@UseGuards(JwtAuthGuard)
 @Controller('products')
 export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
   @ApiOperation({ summary: 'Getting all products' })
   @ApiResponse({ status: 200, type: Products })
-  @UseGuards(JwtAuthGuard)
   @Get()
   getAll() {
     return this.productsService.getAllProducts();
   }
-  //////////////////////////////////////////////////////////////////////
 
-  @ApiOperation({ summary: 'Get all products in the store' })
-  @ApiResponse({ status: 200, type: Products, description: 'write Name shop' })
-  @UseGuards(JwtAuthGuard)
+  @ApiOperation({
+    summary: 'Get all products in the store',
+    description: 'write Name shop',
+  })
+  @ApiResponse({ status: 200, type: Products })
   @Get('shop/:shopName/:numberPage')
   getAllShopProduct(
     @Param('shopName') shopName: string,
@@ -45,23 +46,20 @@ export class ProductsController {
     return this.productsService.getAllShopProducts(shopName, numberPage);
   }
 
-  @ApiOperation({ summary: 'Get all owner products in the store' })
-  @ApiResponse({
-    status: 200,
-    type: Products,
+  @ApiOperation({
+    summary: 'Get all owner products in the store',
     description: 'write id Shop_owner',
   })
-  @UseGuards(JwtAuthGuard)
-  @Get('owner/:ownerProduct')
+  @ApiResponse({ status: 200, type: Products })
+  @Get('owner/:idOwnerProduct')
   getAllOwnerProducts(
-    @Param('ownerProduct') ownerProduct: number
+    @Param('idOwnerProduct') idOwnerProduct: number
   ): Promise<Products[]> {
-    return this.productsService.getAllOwnerProducts(ownerProduct);
+    return this.productsService.getAllOwnerProducts(idOwnerProduct);
   }
 
   @ApiOperation({ summary: 'Product purchase request' })
   @ApiResponse({ status: 201, type: Transactions })
-  @UseGuards(JwtAuthGuard)
   @Post('/buy')
   Buy(@Req() req, @Body() transactionDto: CreateTransactionsDto): Promise<any> {
     return this.productsService.createTransaction(
@@ -72,7 +70,6 @@ export class ProductsController {
 
   @ApiOperation({ summary: ' All Buy RequestUser' })
   @ApiResponse({ status: 200, type: Transactions })
-  @UseGuards(JwtAuthGuard)
   @Get('/allBuyRequestUser')
   BuyRequestUser(@Req() req): Promise<Transactions[]> {
     return this.productsService.getAllBuyRequestUser(req.user.userId);
@@ -80,7 +77,6 @@ export class ProductsController {
 
   @ApiOperation({ summary: ' All Buy User' })
   @ApiResponse({ status: 200, type: Transactions })
-  @UseGuards(JwtAuthGuard)
   @Get('/allBuyUser')
   BuyUser(@Req() req): Promise<any> {
     return this.productsService.getAllBuyUser(req.user.userId);

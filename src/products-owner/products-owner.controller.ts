@@ -28,13 +28,16 @@ import { ProductsOwnerService } from './products-owner.service';
 
 @ApiTags('products-owner')
 @Controller('products-owner')
+@ApiCookieAuth()
+@UseGuards(JwtAuthGuard)
 export class ProductsOwnerController {
   constructor(private productsOwnerService: ProductsOwnerService) {}
 
-  @ApiCookieAuth()
-  @ApiOperation({ summary: 'Create Product', description: 'lol' })
+  @ApiOperation({
+    summary: 'Create Product',
+    description: 'Create Product in the store ',
+  })
   @ApiResponse({ status: 201, type: CreateProductDto })
-  @UseGuards(JwtAuthGuard)
   @Post() //TODO:
   async create(@Req() req, @Body() productDto: CreateProductDto) {
     await this.productsOwnerService.checkShop(productDto.shop_name);
@@ -47,10 +50,8 @@ export class ProductsOwnerController {
     return;
   }
 
-  @ApiCookieAuth()
   @ApiOperation({ summary: 'Get you shop revenue' })
   @ApiResponse({ status: 200, type: Shops })
-  @UseGuards(JwtAuthGuard)
   @Get('/shopsowner/revenue/:ShopName')
   async getShopsRevenue(
     @Req() req,
@@ -66,10 +67,8 @@ export class ProductsOwnerController {
     );
   }
 
-  @ApiCookieAuth()
   @ApiOperation({ summary: 'Change products in the store' })
   @ApiOkResponse({ description: 'ok' })
-  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(
     @Param('id') id: number,
@@ -82,10 +81,8 @@ export class ProductsOwnerController {
     // return
   }
 
-  @ApiCookieAuth()
   @ApiOperation({ summary: 'Get Shop Item Purchased' })
   @ApiResponse({ status: 200, type: Shops })
-  @UseGuards(JwtAuthGuard)
   @Get('/shopsowner/purchased/:ShopName')
   async getShopItemsPurchased(
     @Req() req,
@@ -101,14 +98,12 @@ export class ProductsOwnerController {
     );
   }
 
-  @ApiCookieAuth()
   @ApiOperation({ summary: 'Delete desired product in the store' })
   @ApiResponse({
     status: 200,
     type: Products,
     description: 'write id del product',
   })
-  @UseGuards(JwtAuthGuard)
   @Delete('/:delProductid')
   async deleteProduct(
     @Param('delProductid') delProductid: number,
@@ -123,19 +118,15 @@ export class ProductsOwnerController {
     // return
   }
 
-  @ApiCookieAuth()
   @ApiOperation({ summary: 'All Buy Request Owner' })
   @ApiResponse({ status: 200, type: Transactions })
-  @UseGuards(JwtAuthGuard)
   @Get('buyOwner')
   BuyRequestOwner(@Req() req): Promise<any> {
     return this.productsOwnerService.getAllBuyRequestOwner(req.user.userId);
   }
 
-  @ApiCookieAuth()
   @ApiOperation({ summary: 'reply to purchase request' })
   @ApiResponse({ status: 200, type: Transactions })
-  @UseGuards(JwtAuthGuard)
   @Patch('buyOwner/:id')
   async updateBuyRequestUser(
     @Param('id') id: number,
