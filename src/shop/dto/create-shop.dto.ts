@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateShopDto {
   @ApiProperty({
@@ -19,9 +19,4 @@ export class CreateShopDto {
   @IsNotEmpty()
   @IsString()
   readonly description: string;
-
-  @ApiProperty({ example: '0', description: 'revenue', default: '0' })
-  @IsNotEmpty()
-  @IsNumber()
-  readonly revenue: number;
 }

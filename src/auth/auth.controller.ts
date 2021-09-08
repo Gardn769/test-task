@@ -4,18 +4,15 @@ import {
   Post,
   Request,
   Res,
-  UseFilters,
   UseGuards,
 } from '@nestjs/common';
 import {
   ApiBody,
-  ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { TypeormExceptionFilter } from 'src/typeorm-exception.filter';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { Users } from 'src/users/users.entity';
 import { UsersService } from 'src/users/users.service';
@@ -33,18 +30,14 @@ export class AuthController {
 
   @ApiOperation({ summary: 'Registration (Creating a new user)' })
   @ApiResponse({ status: 201, type: Users })
-  // @UseGuards(LocalAuthGuard)
-  @UseFilters(TypeormExceptionFilter)
   @Post('/registration')
-  create(@Body() userDto: CreateUserDto): Promise<any> {
-    return this.usersService.createUser(userDto);
+  async create(@Body() userDto: CreateUserDto): Promise<any> {
+    return await this.usersService.createUser(userDto);
   }
 
-  // @UseGuards(AuthGuard('local'))
   @UseGuards(LocalAuthGuard)
   @ApiOperation({ summary: 'authorization' })
   @ApiOkResponse({ description: 'login' })
-  @ApiCreatedResponse({ description: 'yspex' })
   @ApiBody({ type: AuthUserDto })
   @Post('auth/login')
   async login(@Request() req, @Res({ passthrough: true }) res): Promise<any> {

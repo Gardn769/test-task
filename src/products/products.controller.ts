@@ -5,7 +5,6 @@ import {
   Param,
   Post,
   Req,
-  UseFilters,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -15,18 +14,17 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { TypeormExceptionFilter } from 'src/typeorm-exception.filter';
 import { CreateTransactionsDto } from './dto/create-transaction.dto';
 import { Products } from './products.entity';
 import { ProductsService } from './products.service';
 import { Transactions } from './transactions.entity';
 
 @ApiTags('products')
+@ApiCookieAuth()
 @Controller('products')
 export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
-  @ApiCookieAuth()
   @ApiOperation({ summary: 'Getting all products' })
   @ApiResponse({ status: 200, type: Products })
   @UseGuards(JwtAuthGuard)
@@ -35,20 +33,18 @@ export class ProductsController {
     return this.productsService.getAllProducts();
   }
   //////////////////////////////////////////////////////////////////////
-  @ApiCookieAuth()
+
   @ApiOperation({ summary: 'Get all products in the store' })
   @ApiResponse({ status: 200, type: Products, description: 'write Name shop' })
   @UseGuards(JwtAuthGuard)
   @Get('shop/:shopName/:numberPage')
   getAllShopProduct(
     @Param('shopName') shopName: string,
-    @Param('numberPage')
-    numberPage: number
+    @Param('numberPage') numberPage: number
   ): Promise<Products[]> {
     return this.productsService.getAllShopProducts(shopName, numberPage);
   }
 
-  @ApiCookieAuth()
   @ApiOperation({ summary: 'Get all owner products in the store' })
   @ApiResponse({
     status: 200,
@@ -63,11 +59,9 @@ export class ProductsController {
     return this.productsService.getAllOwnerProducts(ownerProduct);
   }
 
-  @ApiCookieAuth()
   @ApiOperation({ summary: 'Product purchase request' })
   @ApiResponse({ status: 201, type: Transactions })
   @UseGuards(JwtAuthGuard)
-  @UseFilters(TypeormExceptionFilter)
   @Post('/buy')
   Buy(@Req() req, @Body() transactionDto: CreateTransactionsDto): Promise<any> {
     return this.productsService.createTransaction(
@@ -76,7 +70,6 @@ export class ProductsController {
     );
   }
 
-  @ApiCookieAuth()
   @ApiOperation({ summary: ' All Buy RequestUser' })
   @ApiResponse({ status: 200, type: Transactions })
   @UseGuards(JwtAuthGuard)
@@ -85,7 +78,6 @@ export class ProductsController {
     return this.productsService.getAllBuyRequestUser(req.user.userId);
   }
 
-  @ApiCookieAuth()
   @ApiOperation({ summary: ' All Buy User' })
   @ApiResponse({ status: 200, type: Transactions })
   @UseGuards(JwtAuthGuard)

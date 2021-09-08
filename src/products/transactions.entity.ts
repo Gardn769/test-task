@@ -14,7 +14,7 @@ export class Transactions {
   id: number;
 
   @ApiProperty({ example: 'bread', description: 'product name' })
-  @Column()
+  @Column({ nullable: true })
   name: string;
 
   @ApiProperty({ example: 'food', description: 'description product' })
@@ -22,7 +22,7 @@ export class Transactions {
   description: string;
 
   @ApiProperty({ example: 'Amazon', description: 'shop_name' })
-  @Column()
+  @Column({ nullable: true })
   shop_name: string;
 
   @ApiProperty({ example: '50', description: 'Count' })
@@ -34,15 +34,15 @@ export class Transactions {
   cost: number;
 
   @ApiProperty({ example: '15', description: 'id store owner' })
-  @Column()
+  @Column({ nullable: true })
   owner: number;
 
   @ApiProperty({ example: '10', description: 'id_purchaser' })
-  @Column()
+  @Column({ nullable: true })
   id_purchaser: number;
 
   @ApiProperty({ example: '10', description: 'id_product' })
-  @Column()
+  @Column({ nullable: true })
   id_product: number;
 
   @ApiProperty({ example: '100', description: 'transaction amount' })

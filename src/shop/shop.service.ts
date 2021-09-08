@@ -28,7 +28,12 @@ export class ShopService {
   }
 
   async getAllOwnerShop(owner: number): Promise<Shops[]> {
-    return await this.shops.find({ where: { owner: owner } });
+    return await this.shops.find({
+      where: {
+        owner: owner,
+      },
+      select: ['name', 'description', 'owner'],
+    });
   }
 
   async deleteshop(id: number): Promise<any> {

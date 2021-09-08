@@ -19,7 +19,7 @@ export class UsersService {
     });
 
     // const { password, ...result } = x;
-    return this.users.save(x);
+    return await this.users.save(x);
   }
 
   async getAllUsers() {

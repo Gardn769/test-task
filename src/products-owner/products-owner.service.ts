@@ -6,7 +6,7 @@ import { UpdateTransactionsDto } from 'src/products/dto/update-transaction.dto';
 import { Products } from 'src/products/products.entity';
 import { Transactions } from 'src/products/transactions.entity';
 import { Shops } from 'src/shop/shop.entity';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 
 @Injectable()
 export class ProductsOwnerService {
@@ -20,16 +20,80 @@ export class ProductsOwnerService {
   ) {}
 
   async createproduct(id: number, productDto: CreateProductDto) {
-    const x = this.products.create({
+    const product = await this.products.create({
       ...productDto,
       owner: id,
     });
-    this.products.save(x);
-    const [shops] = await this.shop.find({ where: { name: x.shop_name } });
-    shops.revenue -= x.purchase_price * x.count;
-    await this.shop.update(shops.id, shops);
 
-    return;
+    const check = await this.products.findOne({
+      where: {
+        name: product.name,
+        description: product.description,
+        shop_name: product.shop_name,
+        cost: product.cost,
+        purchase_price: product.purchase_price,
+        owner: product.owner,
+      },
+    });
+
+    if (check) {
+      check.count += product.count;
+      delete check.createAt;
+      await this.products.update(check.id, check);
+    } else {
+      await this.products.save(product);
+    }
+
+    const trans = await this.products.findOne({
+      where: {
+        name: product.name,
+        description: product.description,
+        shop_name: product.shop_name,
+        cost: product.cost,
+        purchase_price: product.purchase_price,
+        owner: product.owner,
+      },
+    });
+
+    const saveID = trans.id;
+    delete trans.id;
+    await this.transaction.save({
+      ...trans,
+      count: product.count,
+      owner: null,
+      id_product: saveID,
+      transaction_amount: -product.count * product.cost,
+      id_purchaser: null,
+      permission: true,
+    });
+
+    return product;
+  }
+
+  async getShopRevenue(
+    shopName: string,
+    from: Date,
+    after: Date
+  ): Promise<any> {
+    const shop = await this.shop.findOneOrFail({
+      where: {
+        name: shopName,
+        createAt: Between(from, after),
+      },
+    });
+
+    const trans = await this.transaction.find({
+      where: {
+        shop_name: shopName,
+        permission: true,
+        updateAt: Between(from, after),
+      },
+    });
+    for (const i of trans) {
+      shop.revenue += i.transaction_amount;
+    }
+
+    return shop;
   }
 
   async updateProducts(
@@ -41,7 +105,7 @@ export class ProductsOwnerService {
   }
 
   async deleteProduct(id: number): Promise<void> {
-    this.products.delete(id);
+    await this.products.delete(id);
   }
 
   async getAllBuyRequestOwner(owner: number) {
@@ -57,12 +121,15 @@ export class ProductsOwnerService {
     const trans: UpdateTransactionsDto = this.transaction.create({
       ...updatetransactionDto,
     });
+    const transact = await this.transaction.findOne(id);
+    const product = await this.products.findOne(transact.id_product);
+
+    if (product.count - transact.count < 0) {
+      throw new HttpException('not enough products', HttpStatus.NOT_FOUND);
+    }
     await this.transaction.update(id, trans);
 
     if (trans.permission) {
-      const transact = await this.transaction.findOne(id);
-
-      const product = await this.products.findOne(transact.id_product);
       product.count -= transact.count;
       this.updateProducts(transact.id_product, product);
 
@@ -75,26 +142,41 @@ export class ProductsOwnerService {
     }
   }
 
-  async checkOwner(idProduct: number, idowner: number): Promise<any> {
-    return this.products
-      .findOne(idProduct, { select: ['owner'] })
-      .then((shop: Products) => {
-        if (shop.owner !== idowner)
+  async checkProductOwner(idProduct: number, idowner: number): Promise<any> {
+    console.log('checkProductOwner');
+    return await this.products
+      .findOneOrFail(idProduct, { select: ['owner'] })
+      .then((product: Products) => {
+        if (product.owner !== idowner)
           throw new HttpException('not owner', HttpStatus.NOT_FOUND);
       });
   }
 
   async checkShop(shop_name: string): Promise<any> {
-    return this.shop
+    console.log('checkShop');
+
+    return await this.shop
       .findOne({ where: { name: shop_name }, select: ['name'] })
-      .then((shop: Shops) => {
-        if (shop.name !== shop_name)
-          throw new HttpException('Shop not created', HttpStatus.NOT_FOUND);
+      .catch(() => {
+        throw new HttpException('Shop not created', HttpStatus.NOT_FOUND);
+      });
+  }
+
+  async checkShopOwner(shop_name: string, idowner: number): Promise<any> {
+    console.log('checkShopOwner');
+
+    return await this.shop
+      .findOneOrFail({ where: { name: shop_name } })
+      .then((shops: Shops) => {
+        if (shops.owner !== idowner) {
+          throw new HttpException('not owner', HttpStatus.NOT_FOUND);
+        }
       });
   }
 
   async checkOwnertrans(idTrans: number, idowner: number): Promise<any> {
-    return this.transaction
+    console.log('checkOwnertrans');
+    return await this.transaction
       .findOne(idTrans, { select: ['owner'] })
       .then((trans: Transactions) => {
         if (trans.owner !== idowner)

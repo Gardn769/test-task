@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
+import { TypeormExceptionFilter } from './exception-filters/typeorm-exception.filter';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
@@ -13,6 +14,7 @@ async function bootstrap(): Promise<void> {
       transform: true,
     })
   );
+  app.useGlobalFilters(new TypeormExceptionFilter());
 
   const config = new DocumentBuilder()
     .setTitle('Тестовое задание')

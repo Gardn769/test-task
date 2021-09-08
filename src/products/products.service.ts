@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Shops } from 'src/shop/shop.entity';
 import { Repository } from 'typeorm';
 import { CreateTransactionsDto } from './dto/create-transaction.dto';
 import { Products } from './products.entity';
@@ -12,9 +11,7 @@ export class ProductsService {
     @InjectRepository(Products)
     private products: Repository<Products>,
     @InjectRepository(Transactions)
-    private transaction: Repository<Transactions>,
-    @InjectRepository(Shops)
-    private shop: Repository<Shops>
+    private transaction: Repository<Transactions>
   ) {}
 
   async getAllProducts() {
@@ -39,14 +36,17 @@ export class ProductsService {
   ): Promise<any> {
     const product = await this.products.findOne(transactionDto.id_product);
 
-    const x = this.transaction.create({
+    delete product.id;
+    const transact = await this.transaction.create({
       ...product,
       ...transactionDto,
       transaction_amount: transactionDto.count * product.cost,
       id_purchaser: id,
     });
 
-    return this.transaction.save(x);
+    console.log(transact.id);
+
+    return await this.transaction.save(transact);
   }
 
   async getAllBuyRequestUser(id_purchaser: number) {

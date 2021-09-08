@@ -3,11 +3,10 @@ import {
   Controller,
   Delete,
   Get,
-  HttpException,
-  HttpStatus,
   Param,
+  Patch,
   Post,
-  Put,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -24,6 +23,7 @@ import { UpdateProductDto } from 'src/products/dto/update-product.dto';
 import { UpdateTransactionsDto } from 'src/products/dto/update-transaction.dto';
 import { Products } from 'src/products/products.entity';
 import { Transactions } from 'src/products/transactions.entity';
+import { Shops } from 'src/shop/shop.entity';
 import { ProductsOwnerService } from './products-owner.service';
 
 @ApiTags('products-owner')
@@ -38,24 +38,46 @@ export class ProductsOwnerController {
   @Post() //TODO:
   async create(@Req() req, @Body() productDto: CreateProductDto) {
     await this.productsOwnerService.checkShop(productDto.shop_name);
-    // await this.productsOwnerService.checkOwner(productDto.shop_name, req.user.userId);//TODO:
-    this.productsOwnerService.createproduct(req.user.userId, productDto);
+    await this.productsOwnerService.checkShopOwner(
+      productDto.shop_name,
+      req.user.userId
+    );
+    await this.productsOwnerService.createproduct(req.user.userId, productDto);
 
     return;
+  }
+
+  @ApiCookieAuth()
+  @ApiOperation({ summary: 'Get you shop revenue' })
+  @ApiResponse({ status: 200, type: Shops })
+  @UseGuards(JwtAuthGuard)
+  @Get('/shopsowner/revenue/:ShopName')
+  async getShopsRevenue(
+    @Req() req,
+    @Param('ShopName') ShopName: string,
+    @Query('from') from: Date,
+    @Query('after') after: Date
+  ): Promise<any> {
+    await this.productsOwnerService.checkShopOwner(ShopName, req.user.userId);
+    return await this.productsOwnerService.getShopRevenue(
+      ShopName,
+      from,
+      after
+    );
   }
 
   @ApiCookieAuth()
   @ApiOperation({ summary: 'Change products in the store' })
   @ApiOkResponse({ description: 'ok' })
   @UseGuards(JwtAuthGuard)
-  @Put(':id')
+  @Patch(':id')
   async update(
     @Param('id') id: number,
     @Req() req,
     @Body() updateProduct: UpdateProductDto
   ): Promise<any> {
-    await this.productsOwnerService.checkOwner(id, req.user.userId);
-    this.productsOwnerService.updateProducts(id, updateProduct);
+    await this.productsOwnerService.checkProductOwner(id, req.user.userId);
+    await this.productsOwnerService.updateProducts(id, updateProduct);
 
     // return
   }
@@ -73,7 +95,10 @@ export class ProductsOwnerController {
     @Param('delProductid') delProductid: number,
     @Req() req
   ): Promise<void> {
-    await this.productsOwnerService.checkOwner(delProductid, req.user.userId);
+    await this.productsOwnerService.checkProductOwner(
+      delProductid,
+      req.user.userId
+    );
     this.productsOwnerService.deleteProduct(delProductid);
 
     // return
@@ -92,13 +117,16 @@ export class ProductsOwnerController {
   @ApiOperation({ summary: 'reply to purchase request' })
   @ApiResponse({ status: 200, type: Transactions })
   @UseGuards(JwtAuthGuard)
-  @Put('buyOwner/:id')
+  @Patch('buyOwner/:id')
   async updateBuyRequestUser(
     @Param('id') id: number,
     @Req() req,
     @Body() updateTransactionsDto: UpdateTransactionsDto
   ): Promise<any> {
     await this.productsOwnerService.checkOwnertrans(id, req.user.userId);
-    this.productsOwnerService.updateBuyRequestUser(id, updateTransactionsDto);
+    await this.productsOwnerService.updateBuyRequestUser(
+      id,
+      updateTransactionsDto
+    );
   }
 }
