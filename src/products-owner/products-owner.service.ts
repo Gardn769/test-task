@@ -96,6 +96,23 @@ export class ProductsOwnerService {
     return shop;
   }
 
+  async getShopItemPurchased(
+    shopName: string,
+    from: Date,
+    after: Date
+  ): Promise<any> {
+    const trans = await this.transaction.find({
+      where: {
+        shop_name: shopName,
+        owner: null,
+        permission: true,
+        updateAt: Between(from, after),
+      },
+    });
+
+    return trans;
+  }
+
   async updateProducts(
     id: number,
     productDto: UpdateProductDto
@@ -143,7 +160,6 @@ export class ProductsOwnerService {
   }
 
   async checkProductOwner(idProduct: number, idowner: number): Promise<any> {
-    console.log('checkProductOwner');
     return await this.products
       .findOneOrFail(idProduct, { select: ['owner'] })
       .then((product: Products) => {
@@ -153,8 +169,6 @@ export class ProductsOwnerService {
   }
 
   async checkShop(shop_name: string): Promise<any> {
-    console.log('checkShop');
-
     return await this.shop
       .findOne({ where: { name: shop_name }, select: ['name'] })
       .catch(() => {
@@ -163,8 +177,6 @@ export class ProductsOwnerService {
   }
 
   async checkShopOwner(shop_name: string, idowner: number): Promise<any> {
-    console.log('checkShopOwner');
-
     return await this.shop
       .findOneOrFail({ where: { name: shop_name } })
       .then((shops: Shops) => {
@@ -175,7 +187,6 @@ export class ProductsOwnerService {
   }
 
   async checkOwnertrans(idTrans: number, idowner: number): Promise<any> {
-    console.log('checkOwnertrans');
     return await this.transaction
       .findOne(idTrans, { select: ['owner'] })
       .then((trans: Transactions) => {

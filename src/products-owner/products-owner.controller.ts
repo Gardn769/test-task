@@ -83,6 +83,25 @@ export class ProductsOwnerController {
   }
 
   @ApiCookieAuth()
+  @ApiOperation({ summary: 'Get Shop Item Purchased' })
+  @ApiResponse({ status: 200, type: Shops })
+  @UseGuards(JwtAuthGuard)
+  @Get('/shopsowner/purchased/:ShopName')
+  async getShopItemsPurchased(
+    @Req() req,
+    @Param('ShopName') ShopName: string,
+    @Query('from') from: Date,
+    @Query('after') after: Date
+  ): Promise<any> {
+    await this.productsOwnerService.checkShopOwner(ShopName, req.user.userId);
+    return await this.productsOwnerService.getShopItemPurchased(
+      ShopName,
+      from,
+      after
+    );
+  }
+
+  @ApiCookieAuth()
   @ApiOperation({ summary: 'Delete desired product in the store' })
   @ApiResponse({
     status: 200,

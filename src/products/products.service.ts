@@ -43,9 +43,6 @@ export class ProductsService {
       transaction_amount: transactionDto.count * product.cost,
       id_purchaser: id,
     });
-
-    console.log(transact.id);
-
     return await this.transaction.save(transact);
   }
 
