@@ -12,11 +12,10 @@ export class ShopService {
   ) {}
 
   async createshop(id: number, ShopsDto: CreateShopDto): Promise<any> {
-    const x = this.shops.create({
+    return this.shops.save({
       ...ShopsDto,
       owner: id,
     });
-    return this.shops.save(x);
   }
 
   async getAllShop(page: number, count = 2): Promise<Shops[]> {
@@ -42,7 +41,7 @@ export class ShopService {
 
   async checkOwner(idShop: number, idOwner: number): Promise<any> {
     return this.shops
-      .findOne(idShop, { select: ['owner'] })
+      .findOneOrFail(idShop, { select: ['owner'] })
       .then((shop: Shops) => {
         if (shop.owner !== idOwner)
           throw new HttpException('not owner', HttpStatus.NOT_FOUND);

@@ -170,7 +170,7 @@ export class ProductsOwnerService {
 
   async checkShop(shop_name: string): Promise<any> {
     return await this.shop
-      .findOne({ where: { name: shop_name }, select: ['name'] })
+      .findOneOrFail({ where: { name: shop_name }, select: ['name'] })
       .catch(() => {
         throw new HttpException('Shop not created', HttpStatus.NOT_FOUND);
       });
@@ -188,7 +188,7 @@ export class ProductsOwnerService {
 
   async checkOwnertrans(idTrans: number, idowner: number): Promise<any> {
     return await this.transaction
-      .findOne(idTrans, { select: ['owner'] })
+      .findOneOrFail(idTrans, { select: ['owner'] })
       .then((trans: Transactions) => {
         if (trans.owner !== idowner)
           throw new HttpException('not owner', HttpStatus.NOT_FOUND);

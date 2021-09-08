@@ -34,7 +34,9 @@ export class ProductsService {
     id: number,
     transactionDto: CreateTransactionsDto
   ): Promise<any> {
-    const product = await this.products.findOne(transactionDto.id_product);
+    const product = await this.products.findOneOrFail(
+      transactionDto.id_product
+    );
 
     delete product.id;
     const transact = await this.transaction.create({
